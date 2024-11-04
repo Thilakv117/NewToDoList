@@ -3,6 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:to_do_list/bloc/to_do_bloc.dart';
 import 'package:to_do_list/models/http_model.dart';
 
+enum Status {
+  pending,
+  all,
+  completed,
+}
+
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
 
@@ -22,6 +28,8 @@ class _HomepageState extends State<Homepage> {
 
   TextEditingController controller = TextEditingController();
   TextEditingController Editcontroller = TextEditingController();
+  Status value = Status.pending;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,51 +40,87 @@ class _HomepageState extends State<Homepage> {
         child: BlocBuilder<ToDoBloc, ToDoState>(builder: (context, state) {
           if (state is ToDoLoaded) {
             lists = state.model;
-            return ListView.builder(
-                itemCount: lists.length,
-                itemBuilder: (context, index) {
-                  final list = lists[index];
-                  return ListTile(
-                    title: ExpansionTile(
-                      title: Text(
-                        list.title.toString(),
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SegmentedButton<Status>(
+                    multiSelectionEnabled: true,
+                    segments: const [
+                      ButtonSegment<Status>(
+                        value: Status.pending,
+                        icon: Icon(Icons.pending),
+                        label: Text("Pending"),
                       ),
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      ButtonSegment<Status>(
+                        value: Status.all,
+                        icon: Icon(Icons.all_inbox),
+                        label: Text("All"),
+                      ),
+                      ButtonSegment<Status>(
+                        value: Status.completed,
+                        icon: Icon(Icons.calendar_view_month),
+                        label: Text("Completed"),
+                      ),
+                    ],
+                    selected: <Status>{value},
+                    onSelectionChanged: (Set<Status> newSelection) {
+                      setState(() {
+                        value = newSelection.last;
+                      });
+                    },
+                  ),
+                ),
+                TextField(),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: lists.length,
+                    itemBuilder: (context, index) {
+                      final list = lists[index];
+                      return ListTile(
+                        title: ExpansionTile(
+                          title: Text(
+                            list.title.toString(),
+                          ),
                           children: [
-                            Checkbox(
-                              value: _isValue,
-                              onChanged: (value) {
-                                setState(() {
-                                  _isValue = value!;
-                                });
-                              },
-                            ),
-                            IconButton(
-                              onPressed: () {
-                                context
-                                    .read<ToDoBloc>()
-                                    .add(DeleteData(id: list.id.toString()));
-                                setState(() {});
-                              },
-                              icon: const Icon(
-                                Icons.delete,
-                                color: Colors.red,
-                              ),
-                            ),
-                            IconButton(
-                              onPressed: () {
-                                _EditdialogBuilder(context, list);
-                              },
-                              icon: const Icon(Icons.edit),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Checkbox(
+                                  value: _isValue,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _isValue = value!;
+                                    });
+                                  },
+                                ),
+                                IconButton(
+                                  onPressed: () {
+                                    context.read<ToDoBloc>().add(
+                                        DeleteData(id: list.id.toString()));
+                                    setState(() {});
+                                  },
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: () {
+                                    _EditdialogBuilder(context, list);
+                                  },
+                                  icon: const Icon(Icons.edit),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                  );
-                });
+                      );
+                    },
+                  ),
+                )
+              ],
+            );
           } else {
             return const CircularProgressIndicator();
           }
@@ -153,7 +197,8 @@ class _HomepageState extends State<Homepage> {
               ),
               child: const Text('Edit'),
               onPressed: () {
-                context.read<ToDoBloc>().add(EditData(id: list.id.toString(), title: Editcontroller.text));
+                context.read<ToDoBloc>().add(EditData(
+                    id: list.id.toString(), title: Editcontroller.text));
                 Navigator.of(context).pop();
                 Editcontroller.clear();
               },
