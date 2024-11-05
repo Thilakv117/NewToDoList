@@ -17,7 +17,7 @@ class ToDoBloc extends Bloc<ToDoEvent, ToDoState> {
       taskList = await getList(event.status);
       emit(ToDoLoaded(model: taskList));
     });
-     on<AllTaskList>((event, emit) async {
+    on<AllTaskList>((event, emit) async {
       emit(ToDoLoading());
       taskList = await AllList(event.status);
       emit(ToDoLoaded(model: taskList));
@@ -30,7 +30,7 @@ class ToDoBloc extends Bloc<ToDoEvent, ToDoState> {
     on<DeleteData>((event, emit) async {
       emit(ToDoLoading());
 
-      await delete(id: event.id);
+      await delete(id: event.id, status: event.status);
       List<ToDoModel> updatedList = await getList(event.status);
       emit(
         ToDoLoaded(model: updatedList),
@@ -68,10 +68,11 @@ class ToDoBloc extends Bloc<ToDoEvent, ToDoState> {
     return taskList ?? [];
   }
 
-  Future<List<ToDoModel>> delete({final status, required String id}) async {
+  Future<List<ToDoModel>> delete(
+      {required var status, required String id}) async {
     String url = "${RouteConstants.taskDelete}$id";
 
-    var response = await HttpService.httpGet(status!, url);
+    var response = await HttpService.httpGet(status, url);
 
     taskList.removeWhere((element) => element.id.toString() == id.toString());
 
@@ -112,6 +113,7 @@ class ToDoBloc extends Bloc<ToDoEvent, ToDoState> {
         list.map((data) => ToDoModel.fromJson(data)).toList();
     return taskList;
   }
+
   Future<List<ToDoModel>> AllList(final status) async {
     var response = await HttpService.httpGet(status, RouteConstants.taskList);
     var responseJson = json.decode(response.body);

@@ -44,6 +44,7 @@ class _HomepageState extends State<Homepage> {
             if (_checkboxStates.length != lists.length) {
               _checkboxStates = List<bool>.filled(lists.length, false);
             }
+
             return Column(
               children: [
                 Padding(
@@ -73,16 +74,14 @@ class _HomepageState extends State<Homepage> {
                         value = newSelection.last;
                       });
                       print(value);
-                      if (value == Status.completed) {
-                        context.read<ToDoBloc>().add(FetchData(true));
-                      }
                       if (value == Status.pending) {
                         context.read<ToDoBloc>().add(FetchData(false));
-                      }
-                      if (value == Status.all) {
+                      } else if (value == Status.all) {
                         context
                             .read<ToDoBloc>()
                             .add(AllTaskList(status: _isValue));
+                      } else if (value == Status.completed) {
+                        context.read<ToDoBloc>().add(FetchData(true));
                       }
                     },
                   ),
@@ -93,11 +92,6 @@ class _HomepageState extends State<Homepage> {
                     itemCount: lists.length,
                     itemBuilder: (context, index) {
                       final list = lists[index];
-                      update() {
-                        if (list.status == true) {
-                          context.read<ToDoBloc>().add(FetchData(_isValue));
-                        }
-                      }
 
                       return ListTile(
                         title: ExpansionTile(
@@ -109,7 +103,7 @@ class _HomepageState extends State<Homepage> {
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
                                 Checkbox(
-                                  value: _checkboxStates[index],
+                                  value: _isValue,
                                   onChanged: (value) {
                                     setState(() {
                                       _checkboxStates[index] = value!;
@@ -124,7 +118,10 @@ class _HomepageState extends State<Homepage> {
                                 IconButton(
                                   onPressed: () {
                                     context.read<ToDoBloc>().add(
-                                        DeleteData(id: list.id.toString()));
+                                          DeleteData(
+                                            id: list.id.toString(),
+                                          ),
+                                        );
                                   },
                                   icon: const Icon(
                                     Icons.delete,
