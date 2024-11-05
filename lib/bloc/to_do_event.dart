@@ -6,20 +6,37 @@ sealed class ToDoEvent extends Equatable {
   @override
   List<Object> get props => [];
 }
-class FetchData extends ToDoEvent {}
+class FetchData extends ToDoEvent {
+  final status;
+  FetchData(this.status);
+}
 
 class AddData extends ToDoEvent {
   final title;
-  AddData(this.title);
+  final status;
+  AddData(this.title, this.status);
 }
 
 class DeleteData extends ToDoEvent {
   final id;
-  DeleteData({required this.id});
+  final status;
+  DeleteData({required this.id, this.status});
 }
 
 class EditData extends ToDoEvent {
   final id;
   final title;
-  EditData({required this.id, required this.title});
+  final status;
+  EditData({required this.id, required this.title, this.status});
+}
+
+class StatusUpdate extends ToDoEvent{
+  final id;
+  final status;
+  StatusUpdate({required this.id ,required this.status});
+}
+class AllTaskList extends ToDoEvent{
+  
+  final status;
+  AllTaskList({required this.status});
 }

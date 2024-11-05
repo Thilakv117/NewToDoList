@@ -20,11 +20,12 @@ class _HomepageState extends State<Homepage> {
   @override
   void initState() {
     super.initState();
-    context.read<ToDoBloc>().add(FetchData());
+    context.read<ToDoBloc>().add(FetchData(_isValue));
   }
 
   bool _isValue = false;
   List<ToDoModel> lists = [];
+  List<bool> _checkboxStates = [];
 
   TextEditingController controller = TextEditingController();
   TextEditingController Editcontroller = TextEditingController();
@@ -40,6 +41,9 @@ class _HomepageState extends State<Homepage> {
         child: BlocBuilder<ToDoBloc, ToDoState>(builder: (context, state) {
           if (state is ToDoLoaded) {
             lists = state.model;
+            if (_checkboxStates.length != lists.length) {
+              _checkboxStates = List<bool>.filled(lists.length, false);
+            }
             return Column(
               children: [
                 Padding(
@@ -68,6 +72,18 @@ class _HomepageState extends State<Homepage> {
                       setState(() {
                         value = newSelection.last;
                       });
+                      print(value);
+                      if (value == Status.completed) {
+                        context.read<ToDoBloc>().add(FetchData(true));
+                      }
+                      if (value == Status.pending) {
+                        context.read<ToDoBloc>().add(FetchData(false));
+                      }
+                      if (value == Status.all) {
+                        context
+                            .read<ToDoBloc>()
+                            .add(AllTaskList(status: _isValue));
+                      }
                     },
                   ),
                 ),
@@ -77,6 +93,12 @@ class _HomepageState extends State<Homepage> {
                     itemCount: lists.length,
                     itemBuilder: (context, index) {
                       final list = lists[index];
+                      update() {
+                        if (list.status == true) {
+                          context.read<ToDoBloc>().add(FetchData(_isValue));
+                        }
+                      }
+
                       return ListTile(
                         title: ExpansionTile(
                           title: Text(
@@ -87,18 +109,22 @@ class _HomepageState extends State<Homepage> {
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
                                 Checkbox(
-                                  value: _isValue,
+                                  value: _checkboxStates[index],
                                   onChanged: (value) {
                                     setState(() {
-                                      _isValue = value!;
+                                      _checkboxStates[index] = value!;
+                                      _isValue = _checkboxStates[index];
                                     });
+                                    context.read<ToDoBloc>().add(EditData(
+                                        id: list.id.toString(),
+                                        title: list.title,
+                                        status: _isValue));
                                   },
                                 ),
                                 IconButton(
                                   onPressed: () {
                                     context.read<ToDoBloc>().add(
                                         DeleteData(id: list.id.toString()));
-                                    setState(() {});
                                   },
                                   icon: const Icon(
                                     Icons.delete,
@@ -160,7 +186,7 @@ class _HomepageState extends State<Homepage> {
               ),
               child: const Text('Create'),
               onPressed: () {
-                context.read<ToDoBloc>().add(AddData(controller.text));
+                context.read<ToDoBloc>().add(AddData(controller.text, false));
                 Navigator.of(context).pop();
                 controller.clear();
               },

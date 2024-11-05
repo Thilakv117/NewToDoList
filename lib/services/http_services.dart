@@ -12,7 +12,7 @@ class HttpService {
 
   static const String domainName ="https://thejustinandrew.pythonanywhere.com/";
 
-  static Future httpGet(String url) async {
+  static Future httpGet(bool status,String url) async {
     var uri = Uri.encodeFull(domainName + url);
     return await http
         .get(Uri.parse(uri), headers: {"Access-Control-Allow-Origin": "*"});
