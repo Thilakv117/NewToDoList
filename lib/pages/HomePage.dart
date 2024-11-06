@@ -92,8 +92,8 @@ class _HomepageState extends State<Homepage> {
                     itemCount: lists.length,
                     itemBuilder: (context, index) {
                       final list = lists[index];
-
-                      return ListTile(
+                       for (int i = 0; i < lists.length; i++) {
+                         return ListTile(
                         title: ExpansionTile(
                           title: Text(
                             list.title.toString(),
@@ -102,8 +102,9 @@ class _HomepageState extends State<Homepage> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
+                                
                                 Checkbox(
-                                  value: _checkboxStates[index],
+                                  value: list.status,
                                   onChanged: (value) {
                                     setState(() {
                                       _checkboxStates[index] = value!;
@@ -142,6 +143,7 @@ class _HomepageState extends State<Homepage> {
                           ],
                         ),
                       );
+                       }
                     },
                   ),
                 )
@@ -223,8 +225,9 @@ class _HomepageState extends State<Homepage> {
               ),
               child: const Text('Edit'),
               onPressed: () {
-                context.read<ToDoBloc>().add(EditData(
-                    id: list.id.toString(), title: Editcontroller.text));
+                context.read<ToDoBloc>().add(FilterTask(
+                    id: list.id.toString(), title: Editcontroller.text, status: list.status));
+                setState(() {});
                 Navigator.of(context).pop();
                 Editcontroller.clear();
               },

@@ -46,8 +46,8 @@ class ToDoBloc extends Bloc<ToDoEvent, ToDoState> {
         emit(ToDoLoading());
         updatedLists = await getList(true);
       } else {
-        emit(ToDoLoading());
         updatedLists = await getList(false);
+        emit(ToDoLoading());
       }
       emit(ToDoLoaded(model: updatedLists));
     });
@@ -57,8 +57,10 @@ class ToDoBloc extends Bloc<ToDoEvent, ToDoState> {
         title: event.title,
         status: event.status,
       );
-
       emit(ToDoLoading());
+      List<ToDoModel> lists = await getList(false);
+
+      emit(ToDoLoaded(model: lists));
     });
   }
   Future<List<ToDoModel>> getList(final status) async {
