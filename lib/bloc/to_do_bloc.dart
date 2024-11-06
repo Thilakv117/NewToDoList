@@ -3,10 +3,8 @@ import 'dart:convert';
 // ignore: depend_on_referenced_packages
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:http/http.dart';
 import 'package:to_do_list/constants/Route_contants.dart';
 import 'package:to_do_list/models/http_model.dart';
-import 'package:to_do_list/pages/HomePage.dart';
 import 'package:to_do_list/services/http_services.dart';
 part 'to_do_event.dart';
 part 'to_do_state.dart';
@@ -58,9 +56,8 @@ class ToDoBloc extends Bloc<ToDoEvent, ToDoState> {
         status: event.status,
       );
       emit(ToDoLoading());
-      List<ToDoModel> lists = await getList(false);
-
-      emit(ToDoLoaded(model: lists));
+      taskList = await getList(event.status);
+      emit(ToDoLoaded(model: taskList));
     });
   }
   Future<List<ToDoModel>> getList(final status) async {
@@ -102,7 +99,7 @@ class ToDoBloc extends Bloc<ToDoEvent, ToDoState> {
   Future<List<ToDoModel>> updateList({
     required String id,
     required String title,
-    var status,
+    required status,
   }) async {
     String url = "${RouteConstants.taskUpdate}$id/";
 

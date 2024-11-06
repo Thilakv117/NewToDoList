@@ -86,64 +86,66 @@ class _HomepageState extends State<Homepage> {
                     },
                   ),
                 ),
-                TextField(),
+                const TextField(),
                 Expanded(
                   child: ListView.builder(
                     itemCount: lists.length,
                     itemBuilder: (context, index) {
                       final list = lists[index];
-                       for (int i = 0; i < lists.length; i++) {
-                         return ListTile(
-                        title: ExpansionTile(
-                          title: Text(
-                            list.title.toString(),
+                      for (int i = 0; i < lists.length;) {
+                        return ListTile(
+                          leading: CircleAvatar(
+                            child: Text("${index + 1}"),
                           ),
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                
-                                Checkbox(
-                                  value: list.status,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _checkboxStates[index] = value!;
-                                    });
-                                    _isValue = _checkboxStates[index];
-                                    print(_isValue);
-                                    context.read<ToDoBloc>().add(EditData(
-                                          id: list.id.toString(),
-                                          title: list.title,
-                                          status: _isValue,
-                                        ));
-                                    setState(() {});
-                                  },
-                                ),
-                                IconButton(
-                                  onPressed: () {
-                                    context.read<ToDoBloc>().add(
-                                          DeleteData(
-                                            id: list.id.toString(),
-                                          ),
-                                        );
-                                  },
-                                  icon: const Icon(
-                                    Icons.delete,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: () {
-                                    _EditdialogBuilder(context, list);
-                                  },
-                                  icon: const Icon(Icons.edit),
-                                ),
-                              ],
+                          title: ExpansionTile(
+                            title: Text(
+                              list.title.toString(),
                             ),
-                          ],
-                        ),
-                      );
-                       }
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  Checkbox(
+                                    value: list.status,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _checkboxStates[index] = value!;
+                                      });
+                                      _isValue = _checkboxStates[index];
+
+                                      context.read<ToDoBloc>().add(EditData(
+                                            id: list.id.toString(),
+                                            title: list.title,
+                                            status: _isValue,
+                                          ));
+                                    },
+                                  ),
+                                  IconButton(
+                                    onPressed: () {
+                                      context.read<ToDoBloc>().add(
+                                            DeleteData(
+                                              id: list.id.toString(),
+                                            ),
+                                          );
+                                    },
+                                    icon: const Icon(
+                                      Icons.delete,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                  IconButton(
+                                    onPressed: () {
+                                      _EditdialogBuilder(context, list);
+                                    },
+                                    icon: const Icon(Icons.edit),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      }
                     },
                   ),
                 )
@@ -158,7 +160,7 @@ class _HomepageState extends State<Homepage> {
         onPressed: () {
           _dialogBuilder(context);
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -226,7 +228,9 @@ class _HomepageState extends State<Homepage> {
               child: const Text('Edit'),
               onPressed: () {
                 context.read<ToDoBloc>().add(FilterTask(
-                    id: list.id.toString(), title: Editcontroller.text, status: list.status));
+                    id: list.id.toString(),
+                    title: Editcontroller.text,
+                    status: list.status));
                 setState(() {});
                 Navigator.of(context).pop();
                 Editcontroller.clear();
