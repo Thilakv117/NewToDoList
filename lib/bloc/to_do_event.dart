@@ -14,6 +14,7 @@ class FetchData extends ToDoEvent {
 class AddData extends ToDoEvent {
   final title;
   final status;
+  
   AddData(this.title, this.status);
 }
 
@@ -29,14 +30,15 @@ class EditData extends ToDoEvent {
   final status;
   EditData({required this.id, required this.title, this.status});
 }
-
-class StatusUpdate extends ToDoEvent{
-  final id;
-  final status;
-  StatusUpdate({required this.id ,required this.status});
-}
-class AllTaskList extends ToDoEvent{
-  
+class AllTaskList extends ToDoEvent{ 
   final status;
   AllTaskList({required this.status});
 }
+
+class FilterTask extends ToDoEvent {
+  final id;
+  final title;
+  final status;
+  FilterTask({required this.id, required this.title, required this.status});
+}
+

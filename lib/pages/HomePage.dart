@@ -29,7 +29,7 @@ class _HomepageState extends State<Homepage> {
 
   TextEditingController controller = TextEditingController();
   TextEditingController Editcontroller = TextEditingController();
-  Status value = Status.pending;
+  Status value = Status.all;
 
   @override
   Widget build(BuildContext context) {
@@ -103,16 +103,19 @@ class _HomepageState extends State<Homepage> {
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
                                 Checkbox(
-                                  value: _isValue,
+                                  value: _checkboxStates[index],
                                   onChanged: (value) {
                                     setState(() {
                                       _checkboxStates[index] = value!;
-                                      _isValue = _checkboxStates[index];
                                     });
+                                    _isValue = _checkboxStates[index];
+                                    print(_isValue);
                                     context.read<ToDoBloc>().add(EditData(
-                                        id: list.id.toString(),
-                                        title: list.title,
-                                        status: _isValue));
+                                          id: list.id.toString(),
+                                          title: list.title,
+                                          status: _isValue,
+                                        ));
+                                    setState(() {});
                                   },
                                 ),
                                 IconButton(

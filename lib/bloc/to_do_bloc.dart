@@ -3,8 +3,10 @@ import 'dart:convert';
 // ignore: depend_on_referenced_packages
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:http/http.dart';
 import 'package:to_do_list/constants/Route_contants.dart';
 import 'package:to_do_list/models/http_model.dart';
+import 'package:to_do_list/pages/HomePage.dart';
 import 'package:to_do_list/services/http_services.dart';
 part 'to_do_event.dart';
 part 'to_do_state.dart';
@@ -24,23 +26,39 @@ class ToDoBloc extends Bloc<ToDoEvent, ToDoState> {
     });
     on<AddData>((event, emit) async {
       emit(ToDoLoading());
-      taskList = await Addtask(title: event.title!, status: event.status);
-      emit(ToDoLoaded(model: taskList));
+      await Addtask(title: event.title!, status: event.status);
+      emit(ToDoLoaded(model: await getList(event.status)));
     });
     on<DeleteData>((event, emit) async {
       emit(ToDoLoading());
-
-      await delete(id: event.id, status: event.status);
-      List<ToDoModel> updatedList = await getList(event.status);
-      emit(
-        ToDoLoaded(model: updatedList),
-      );
+      List<ToDoModel> list = await delete(id: event.id, status: event.status);
+      emit(ToDoLoaded(model: list));
     });
     on<EditData>((event, emit) async {
       emit(ToDoLoading());
-      await updateList(id: event.id, title: event.title, status: event.status);
-      List<ToDoModel> updatedLists = await getList(event.status);
+      await updateList(
+        id: event.id,
+        title: event.title,
+        status: event.status,
+      );
+      List<ToDoModel> updatedLists;
+      if (event.status == false) {
+        emit(ToDoLoading());
+        updatedLists = await getList(true);
+      } else {
+        emit(ToDoLoading());
+        updatedLists = await getList(false);
+      }
       emit(ToDoLoaded(model: updatedLists));
+    });
+    on<FilterTask>((event, emit) async {
+      await updateList(
+        id: event.id,
+        title: event.title,
+        status: event.status,
+      );
+
+      emit(ToDoLoading());
     });
   }
   Future<List<ToDoModel>> getList(final status) async {
@@ -79,8 +97,11 @@ class ToDoBloc extends Bloc<ToDoEvent, ToDoState> {
     return taskList;
   }
 
-  Future<List<ToDoModel>> updateList(
-      {required String id, required String title, final status}) async {
+  Future<List<ToDoModel>> updateList({
+    required String id,
+    required String title,
+    var status,
+  }) async {
     String url = "${RouteConstants.taskUpdate}$id/";
 
     var params = {
@@ -99,6 +120,7 @@ class ToDoBloc extends Bloc<ToDoEvent, ToDoState> {
           break;
         }
       }
+      print("Changed");
       return taskList;
     } else {
       throw Exception();

@@ -15,3 +15,6 @@ final class ToDoLoaded extends ToDoState {
   @override 
   List<Object>get props => [model];
 }
+
+final class ToDoPending extends ToDoState{}
+final class ToDoCompleted extends ToDoState{}
