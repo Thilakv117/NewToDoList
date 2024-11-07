@@ -26,6 +26,7 @@ class _HomepageState extends State<Homepage> {
   bool _isValue = false;
   List<ToDoModel> lists = [];
   List<bool> _checkboxStates = [];
+  bool _isPageValue = false;
 
   TextEditingController controller = TextEditingController();
   TextEditingController Editcontroller = TextEditingController();
@@ -75,12 +76,24 @@ class _HomepageState extends State<Homepage> {
                       });
                       print(value);
                       if (value == Status.pending) {
+                        _isPageValue = false;
+                        setState(() {
+                          _isValue = false;
+                        });
                         context.read<ToDoBloc>().add(FetchData(false));
                       } else if (value == Status.all) {
+                        setState(() {
+                          _isPageValue = false;
+                          _isValue = false;
+                        });
                         context
                             .read<ToDoBloc>()
                             .add(AllTaskList(status: _isValue));
                       } else if (value == Status.completed) {
+                        setState(() {
+                          _isPageValue = true;
+                          _isValue = false;
+                        });
                         context.read<ToDoBloc>().add(FetchData(true));
                       }
                     },
@@ -95,6 +108,7 @@ class _HomepageState extends State<Homepage> {
                       for (int i = 0; i < lists.length;) {
                         return ListTile(
                           leading: CircleAvatar(
+                            backgroundColor: Colors.grey,
                             child: Text("${index + 1}"),
                           ),
                           title: ExpansionTile(
@@ -156,17 +170,24 @@ class _HomepageState extends State<Homepage> {
           }
         }),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _dialogBuilder(context);
+      floatingActionButton: BlocBuilder<ToDoBloc, ToDoState>(
+        builder: (context, state) {
+          if (state is ToDoLoaded) {
+            List<ToDoModel> list = state.model;
+          }
+          return FloatingActionButton(
+            onPressed: () {
+              _dialogBuilder(context, _checkboxStates);
+            },
+            child: const Icon(Icons.add),
+          );
         },
-        child: const Icon(Icons.add),
       ),
     );
   }
 
-  Future<void> _dialogBuilder(BuildContext context) {
-    return showDialog<void>(
+  Future<void> _dialogBuilder(BuildContext context, list) {
+    return showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
@@ -190,7 +211,13 @@ class _HomepageState extends State<Homepage> {
               ),
               child: const Text('Create'),
               onPressed: () {
-                context.read<ToDoBloc>().add(AddData(controller.text, false));
+                if (controller.text.isNotEmpty) {
+                  context
+                      .read<ToDoBloc>()
+                      .add(AddData(controller.text, _isValue, _isPageValue));
+                } else {
+                  EmptyTitleshowSnackBar();
+                }
                 Navigator.of(context).pop();
                 controller.clear();
               },
@@ -239,6 +266,15 @@ class _HomepageState extends State<Homepage> {
           ],
         );
       },
+    );
+  }
+
+  EmptyTitleshowSnackBar() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Title should not be empty'),
+        duration: Duration(seconds: 3),
+      ),
     );
   }
 }

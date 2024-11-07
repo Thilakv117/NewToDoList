@@ -20,12 +20,20 @@ class ToDoBloc extends Bloc<ToDoEvent, ToDoState> {
     on<AllTaskList>((event, emit) async {
       emit(ToDoLoading());
       taskList = await AllList(event.status);
+
       emit(ToDoLoaded(model: taskList));
     });
     on<AddData>((event, emit) async {
       emit(ToDoLoading());
-      await Addtask(title: event.title!, status: event.status);
-      emit(ToDoLoaded(model: await getList(event.status)));
+      taskList = await Addtask(
+          title: event.title!,
+          status: event.status,
+          pageValue: event.pageValue);
+      if (event.status != null) {
+        emit(ToDoLoaded(model: taskList));
+      } else {
+        emit(ToDoLoaded(model: taskList));
+      }
     });
     on<DeleteData>((event, emit) async {
       emit(ToDoLoading());
@@ -43,6 +51,7 @@ class ToDoBloc extends Bloc<ToDoEvent, ToDoState> {
       if (event.status == false) {
         emit(ToDoLoading());
         updatedLists = await getList(true);
+        emit(ToDoLoaded(model: updatedLists));
       } else {
         updatedLists = await getList(false);
         emit(ToDoLoading());
@@ -63,7 +72,6 @@ class ToDoBloc extends Bloc<ToDoEvent, ToDoState> {
   Future<List<ToDoModel>> getList(final status) async {
     var response = await HttpService.httpGet(status, RouteConstants.taskList);
     var responseJson = json.decode(response.body);
-    print(responseJson);
     Iterable list = responseJson;
     List<ToDoModel> taskList =
         list.map((data) => ToDoModel.fromJson(data)).toList();
@@ -74,14 +82,19 @@ class ToDoBloc extends Bloc<ToDoEvent, ToDoState> {
   }
 
   Future<List<ToDoModel>> Addtask(
-      {required String title, required final status}) async {
+      {required String title,
+      required final status,
+      required final pageValue}) async {
     String url = "${RouteConstants.taskCreate}";
     var params = {"title": title, 'completed': status};
     var response =
         await HttpService.httpPost(url: url, params: json.encode(params));
     var responseJson = json.decode(response.body);
     ToDoModel task = ToDoModel.fromJson(responseJson);
-    taskList.add(task);
+    if (pageValue == false) {
+      taskList.add(task);
+    }
+
     return taskList ?? [];
   }
 

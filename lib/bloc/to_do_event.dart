@@ -14,8 +14,9 @@ class FetchData extends ToDoEvent {
 class AddData extends ToDoEvent {
   final title;
   final status;
+  final pageValue;
   
-  AddData(this.title, this.status);
+  AddData(this.title, this.status, this.pageValue);
 }
 
 class DeleteData extends ToDoEvent {
