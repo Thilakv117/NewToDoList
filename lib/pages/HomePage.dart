@@ -20,7 +20,7 @@ class _HomepageState extends State<Homepage> {
   @override
   void initState() {
     super.initState();
-    context.read<ToDoBloc>().add(FetchData(_isValue));
+    context.read<ToDoBloc>().add(FetchData(null));
   }
 
   bool _isValue = false;
@@ -127,7 +127,7 @@ class _HomepageState extends State<Homepage> {
                                         _checkboxStates[index] = value!;
                                       });
                                       _isValue = _checkboxStates[index];
-
+                                      TaskCompleted();
                                       context.read<ToDoBloc>().add(EditData(
                                             id: list.id.toString(),
                                             title: list.title,
@@ -137,11 +137,7 @@ class _HomepageState extends State<Homepage> {
                                   ),
                                   IconButton(
                                     onPressed: () {
-                                      context.read<ToDoBloc>().add(
-                                            DeleteData(
-                                              id: list.id.toString(),
-                                            ),
-                                          );
+                                      ConformationDialogueBox(context, list);
                                     },
                                     icon: const Icon(
                                       Icons.delete,
@@ -269,10 +265,56 @@ class _HomepageState extends State<Homepage> {
     );
   }
 
+  Future<void> ConformationDialogueBox(BuildContext context, list) {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Are you sure you want to delete this task'),
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Conform'),
+              onPressed: () {
+                context.read<ToDoBloc>().add(
+                      DeleteData(
+                        id: list.id.toString(),
+                      ),
+                    );
+                setState(() {});
+                Navigator.of(context).pop();
+                Editcontroller.clear();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
   EmptyTitleshowSnackBar() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Title should not be empty'),
+        duration: Duration(seconds: 3),
+      ),
+    );
+    
+  }
+  TaskCompleted() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('You completed the task'),
         duration: Duration(seconds: 3),
       ),
     );
